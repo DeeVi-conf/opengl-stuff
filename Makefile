@@ -4,7 +4,7 @@ LDFLAGS = -lglfw -lGLEW -lGL -lm -ldl
 
 SRC = test1.cpp
 OBJ = $(SRC:.c=.o)
-OUT = openGL-test-program
+OUT = bin/openGL-test-program
 
 all: $(OUT)
 
