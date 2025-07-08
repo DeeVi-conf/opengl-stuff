@@ -9,3 +9,4 @@ include/
 src/
 build/
 glad.c
+compile_flags.txt
