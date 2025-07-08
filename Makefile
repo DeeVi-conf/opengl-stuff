@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -std=c++17
 LDFLAGS = -lglfw -lGLEW -lGL -lm -ldl
 
-SRC = test1.cpp
+SRC = test2.cpp
 OBJ = $(SRC:.c=.o)
 OUT = bin/openGL-test-program
 
