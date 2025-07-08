@@ -4,3 +4,8 @@
 build/Debug/test1.o
 bin/
 
+glad.zip
+include/
+src/
+build/
+glad.c
