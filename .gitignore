@@ -6,7 +6,7 @@ bin/
 
 glad.zip
 include/
-src/
+glad/
 build/
 glad.c
 compile_flags.txt

@@ -1,4 +1,4 @@
-CXX = g++
+CXX = clang++
 CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -std=c++17
 LDFLAGS = -lglfw -lGLEW -lGL -lm -ldl
 
