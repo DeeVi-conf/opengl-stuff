@@ -3,8 +3,8 @@ CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -std=c++17 -
 
 LDFLAGS = -lglfw -ldl -lGL
 
-SRC = src/exercises-1/exercise-1-2.cpp glad/glad.c
-OUT = bin/exercise-1-2
+SRC = src/exercises-1/exercise-1-3.cpp glad/glad.c
+OUT = bin/exercise-1-3
 
 all: $(OUT)
 

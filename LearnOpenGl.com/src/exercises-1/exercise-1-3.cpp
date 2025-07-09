@@ -1,5 +1,5 @@
-/** Now create the same 2 triangles using two different VAOs and VBOs 
-for their data */
+/** Create two shader programs where the second program uses a different fragment shader that outputs the color yellow; draw both triangles again where 
+one outputs the color yellow */
 
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
@@ -10,11 +10,17 @@ const char *vertexShaderSource = "#version 330 core\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
+const char *fragmentShader1Source = "#version 330 core\n"
     "    out vec4 FragColor;\n"
     "void main()\n"
     "{\n"
     "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "}\0";
+const char *fragmentShader2Source = "#version 330 core\n"
+    "    out vec4 FragColor;\n"
+    "void main()\n"
+    "{\n"
+    "    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
     "}\0";
 
 const unsigned int SCR_WIDTH = 800;
@@ -44,21 +50,32 @@ int main(){
 
     // shader setup
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    unsigned int shaderProgram = glCreateProgram();
+    unsigned int fragmentShader1 = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int fragmentShader2 = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int shaderProgram1 = glCreateProgram();
+    unsigned int shaderProgram2 = glCreateProgram();
 
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
 
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+    glShaderSource(fragmentShader1, 1, &fragmentShader1Source, NULL);
+    glCompileShader(fragmentShader1);
 
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    glShaderSource(fragmentShader2, 1, &fragmentShader2Source, NULL);
+    glCompileShader(fragmentShader2);
+
+    glAttachShader(shaderProgram1, vertexShader);
+    glAttachShader(shaderProgram1, fragmentShader1);
+    glLinkProgram(shaderProgram1);
+
+    glAttachShader(shaderProgram2, vertexShader);
+    glAttachShader(shaderProgram2, fragmentShader2);
+    glLinkProgram(shaderProgram2);
+    
 
     glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(fragmentShader1);
+    glDeleteShader(fragmentShader2);
     
     // data
     float vertices1[] = {
@@ -103,10 +120,12 @@ int main(){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        glUseProgram(shaderProgram1);
         
         glBindVertexArray(VAO1);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glUseProgram(shaderProgram2);
 
         glBindVertexArray(VAO2);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -116,7 +135,8 @@ int main(){
         glfwPollEvents();
     }
 
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderProgram1);
+    glDeleteProgram(shaderProgram2);
     glfwDestroyWindow(window);
     glDeleteVertexArrays(1, &VAO1);
     glDeleteBuffers(1, &VBO1);
