@@ -79,8 +79,8 @@ int main()
 
     // Shader Initialization
     unsigned int vertexShader = 0;
-    vertexShader = glad_glCreateShader(GL_VERTEX_SHADER);
-    glad_glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
 
     unsigned int fragmentShader;
@@ -100,7 +100,7 @@ int main()
 
     // Main Initialization
     unsigned int vertex_buffer_object;
-    glad_glGenBuffers(1, &vertex_buffer_object);
+    glGenBuffers(1, &vertex_buffer_object);
     unsigned int VertexArrayObject;
     glGenVertexArrays(1, &VertexArrayObject); 
 
@@ -144,6 +144,11 @@ int main()
         glfwPollEvents();
     }
 
+    glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &vertex_buffer_object);
+    glDeleteVertexArrays(1, &VertexArrayObject);
+    glDeleteProgram(shaderProgram);
+    glfwDestroyWindow(window);
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
     return 0;
