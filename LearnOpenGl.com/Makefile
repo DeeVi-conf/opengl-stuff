@@ -3,8 +3,8 @@ CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -std=c++17 -
 
 LDFLAGS = -lglfw -ldl -lGL
 
-SRC = src/exercises-1/exercise-1-3.cpp glad/glad.c
-OUT = bin/exercise-1-3
+SRC = src/shaders-learn/shaders-learn.cpp glad/glad.c
+OUT = bin/shaders-learn-bin
 
 all: $(OUT)
 
