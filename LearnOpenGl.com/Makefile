@@ -1,10 +1,10 @@
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -std=c++17 -Iinclude
+CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -Iinclude
 
 LDFLAGS = -lglfw -ldl -lGL
 
-SRC = src/exercises-2/exercise-2-3/main.cpp glad/glad.c
-OUT = bin/exercise-2-3
+SRC = src/texture.cpp glad/glad.c src/stb_image_impl.cpp
+OUT = bin/texture
 
 all: $(OUT)
 
