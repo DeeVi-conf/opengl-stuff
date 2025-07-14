@@ -3,6 +3,43 @@
 #include <GL/glext.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <string>
+
+#include "FILE_H.hpp"
+
+static uint CompileShader( uint type, const std::string& source){
+    uint id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &src, nullptr);
+    glCompileShader(id);
+
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    if(result == GL_FALSE){
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        char* message = (char*)alloca(length * sizeof(char));
+        glGetShaderInfoLog(id, length, &length, message);
+        std::cout<<"failed to compile shader :\n"<<message<<"\n";
+        glDeleteShader(id);
+        return 0;
+    }
+
+    return id;
+}
+
+static uint CreateShader(const std::string& vertexShader, const std::string& fragmentShader){
+    uint program = glCreateProgram();
+    uint vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+    uint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glValidateProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
 
 int main(void)
 {
@@ -31,7 +68,7 @@ int main(void)
 
     float positions[6] = {
         -0.5f, -0.5f,
-        0.5f, 0.5f,
+        0.0f, 0.5f,
         0.5f, -0.5f
     };
     unsigned int buffer;
@@ -41,6 +78,12 @@ int main(void)
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+
+
+    std::string vertex_shader_source = ShaderOpen("shaders/VertexShader.vs");
+    std::string fragment_shader_source = ShaderOpen("shaders/FragmentShader.fs");
+    uint shader = CreateShader(vertex_shader_source, fragment_shader_source);
+    glUseProgram(shader);
 
 
     /* Loop until the user closes the window */
@@ -58,6 +101,8 @@ int main(void)
         glfwPollEvents();
     }
 
+    glDeleteBuffers(1, &buffer);
+    glDeleteProgram(shader);
     glfwTerminate();
     return 0;
 }
