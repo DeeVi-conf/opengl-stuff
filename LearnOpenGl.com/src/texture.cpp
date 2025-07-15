@@ -10,11 +10,29 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+float ratio = 0.2;
 
-void processInput(GLFWwindow *window)
-{
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+
+void processInput(GLFWwindow *window){
+    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
+        if (glfwGetKey(window, key) == GLFW_PRESS) {
+            switch (key) {
+                case GLFW_KEY_ESCAPE:
+                    glfwSetWindowShouldClose(window, true);
+                    break;
+                case GLFW_KEY_UP:
+                    if(ratio<1.0) {ratio += 0.01;} else {ratio=1.0;}
+                    //std::cout<<"Up key pressed\n";
+                    break;
+                case GLFW_KEY_DOWN:
+                    if(ratio>0.0)ratio -= 0.01; else {ratio = 0.0;}
+                    //std::cout<<"Down key pressed\n";
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -34,7 +52,7 @@ uint NewTexture(const char* path){
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
@@ -138,7 +156,12 @@ int main()
     // render loop
     while (!glfwWindowShouldClose(window))
     {
+        shaderProgram.use();
+        shaderProgram.setInt("texture", 0);
+        shaderProgram.setInt("texture2", 1);
         processInput(window);
+        //std::cout<<ratio<<"\n";
+        shaderProgram.setFloat("ratio", ratio);
 
         // main rendering loop
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

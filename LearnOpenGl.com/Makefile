@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -Wpedantic -g -fsanitize=address,undefined -Iinclude
+CXXFLAGS = -Wall -Wextra -Wpedantic -g -Iinclude
 
 LDFLAGS = -lglfw -ldl -lGL
 
