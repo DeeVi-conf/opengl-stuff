@@ -3,8 +3,8 @@ CXXFLAGS = -Wall -Wextra -Wpedantic -g -Iinclude
 
 LDFLAGS = -lglfw -ldl -lGL
 
-SRC = src/texture.cpp glad/glad.c src/stb_image_impl.cpp
-OUT = bin/texture
+SRC = src/matrix.cpp glad/glad.c src/stb_image_impl.cpp
+OUT = bin/matrix
 
 all: $(OUT)
 
