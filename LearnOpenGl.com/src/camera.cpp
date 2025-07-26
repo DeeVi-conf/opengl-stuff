@@ -1,10 +1,8 @@
-#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm/glm/detail/func_trigonometric.hpp"
 #include "glm/glm/detail/type_mat.hpp"
 #include "glm/glm/detail/type_vec.hpp"
-#include "glm/glm/gtc/quaternion.hpp"
 #include "shader_s.hpp"
 #include <iostream>
 #include <regex>
@@ -18,30 +16,23 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+glm::vec3 direction;
+float lastX = 400, lastY = 300;
+float yaw = -90.0f, pitch = 0.f;
+bool firstMouse = true;
+
 float ratio = 0.2;
 
+void processInput(GLFWwindow *window);
 
-void processInput(GLFWwindow *window){
-    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
-        if (glfwGetKey(window, key) == GLFW_PRESS) {
-            switch (key) {
-                case GLFW_KEY_ESCAPE:
-                    glfwSetWindowShouldClose(window, true);
-                    break;
-                case GLFW_KEY_UP:
-                    if(ratio<1.0) {ratio += 0.01;} else {ratio=1.0;}
-                    //std::cout<<"Up key pressed\n";
-                    break;
-                case GLFW_KEY_DOWN:
-                    if(ratio>0.0)ratio -= 0.01; else {ratio = 0.0;}
-                    //std::cout<<"Down key pressed\n";
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -99,6 +90,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+    glfwSetCursorPosCallback(window, mouse_callback);  
     
     // glad: load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
@@ -199,52 +192,50 @@ int main()
     shaderProgram.setInt("texture", 0);
     shaderProgram.setInt("texture2", 1);
 
+    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)SCR_WIDTH / float(SCR_HEIGHT), 0.1f, 100.f);
+    shaderProgram.setMat4("projection", projection);
+
     // render loop
     while (!glfwWindowShouldClose(window))
     {
-
-        // Model Matrix
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 1.0f, 0.0f));  
-        // View Matrix
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // move the scene 3 units ahead
-        //Projection Matrix
-        glm::mat4 projection = glm::mat4(1.0);
-        projection = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.f);
-
-        shaderProgram.use();
-        shaderProgram.setInt("texture", 0);
-        shaderProgram.setInt("texture2", 1);
         processInput(window);
+
         shaderProgram.setFloat("ratio", ratio);
 
-        // Just to remember what is actualy happening under the hood
-        // int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-        // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        //shaderProgram.setMat4("model", model);
-        shaderProgram.setMat4("view", view);
-        shaderProgram.setMat4("projection", projection);
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame; 
 
         // main rendering loop
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw
+        // camera/view transformation
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(direction);
+
+        glm::mat4 view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        view = glm::lookAt(cameraPos,
+                        cameraPos + cameraFront,
+                            cameraUp);
+        shaderProgram.setMat4("view", view);
+
+        // render boxes
         glBindVertexArray(VertexArrayObject);
-        for (unsigned int i = 0; i < 10; i++) {
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
+            float angle = 0.0f;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            if(i % 3 == 0){
-                angle = glfwGetTime() * 25.f;
-                model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.f, 0.0f));
-            }
             shaderProgram.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
@@ -253,10 +244,67 @@ int main()
 
     glDeleteBuffers(1, &vertex_buffer_object);
     glDeleteVertexArrays(1, &VertexArrayObject);
-    //glDeleteProgram(shaderProgram);
     glfwDestroyWindow(window);
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
     return 0;
 }
 
+void processInput(GLFWwindow *window){
+    float cameraSpeed = 2.5f * deltaTime;
+    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
+        if (glfwGetKey(window, key) == GLFW_PRESS) {
+            switch (key) {
+                case GLFW_KEY_ESCAPE:
+                    glfwSetWindowShouldClose(window, true);
+                    break;
+                case GLFW_KEY_UP:
+                    if(ratio<1.0) {ratio += 0.01;} else {ratio=1.0;}
+                    break;
+                case GLFW_KEY_DOWN:
+                    if(ratio>0.0)ratio -= 0.01; else {ratio = 0.0;}
+                    break;
+
+                // Movement Input
+
+                case GLFW_KEY_W:
+                    cameraPos += cameraSpeed * cameraFront;
+                    break;
+                case GLFW_KEY_S:
+                    cameraPos -= cameraSpeed * cameraFront;
+                    break;
+                case GLFW_KEY_A:
+                    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                    break;
+                case GLFW_KEY_D:
+                    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    if (firstMouse) // initially set to true
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw   += xoffset;
+    pitch += yoffset;  
+
+    if(pitch > 89.0f) { pitch =  89.0f; }
+    if(pitch < -89.0f) { pitch = -89.0f; }
+}
