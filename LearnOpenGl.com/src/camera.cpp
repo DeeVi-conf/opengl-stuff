@@ -11,11 +11,13 @@
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
+#include "camera.hpp"
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+Camera camera;
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
@@ -216,10 +218,7 @@ int main()
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraFront = glm::normalize(direction);
 
-        glm::mat4 view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        view = glm::lookAt(cameraPos,
-                        cameraPos + cameraFront,
-                            cameraUp);
+        glm::mat4 view = camera.GetViewMatrix();
         shaderProgram.setMat4("view", view);
 
         // render boxes
@@ -252,38 +251,19 @@ int main()
 
 void processInput(GLFWwindow *window){
     float cameraSpeed = 2.5f * deltaTime;
-    for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; key++) {
-        if (glfwGetKey(window, key) == GLFW_PRESS) {
-            switch (key) {
-                case GLFW_KEY_ESCAPE:
-                    glfwSetWindowShouldClose(window, true);
-                    break;
-                case GLFW_KEY_UP:
-                    if(ratio<1.0) {ratio += 0.01;} else {ratio=1.0;}
-                    break;
-                case GLFW_KEY_DOWN:
-                    if(ratio>0.0)ratio -= 0.01; else {ratio = 0.0;}
-                    break;
-
-                // Movement Input
-
-                case GLFW_KEY_W:
-                    cameraPos += cameraSpeed * cameraFront;
-                    break;
-                case GLFW_KEY_S:
-                    cameraPos -= cameraSpeed * cameraFront;
-                    break;
-                case GLFW_KEY_A:
-                    cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                    break;
-                case GLFW_KEY_D:
-                    cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                    break;
-                default:
-                    break;
-            }
-        }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) { glfwSetWindowShouldClose(window, true); }
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        if(ratio<1.0) {ratio += 0.01;} 
+        else {ratio=1.0;} 
     }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        if(ratio>0.0)ratio -= 0.01; 
+        else {ratio = 0.0;} 
+    }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) { camera.ProcessKeyboard(FORWARD, deltaTime); }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { camera.ProcessKeyboard(LEFT, deltaTime); }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) { camera.ProcessKeyboard(BACKWARD, deltaTime); }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { camera.ProcessKeyboard(RIGHT, deltaTime); }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos){
@@ -298,13 +278,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
     lastX = xpos;
     lastY = ypos;
 
-    const float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw   += xoffset;
-    pitch += yoffset;  
-
-    if(pitch > 89.0f) { pitch =  89.0f; }
-    if(pitch < -89.0f) { pitch = -89.0f; }
+    camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
