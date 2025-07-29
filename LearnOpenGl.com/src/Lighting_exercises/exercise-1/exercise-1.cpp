@@ -1,3 +1,5 @@
+// Right now the light source is a boring static light source that doesn't move. Try to move the light source around the scene over time using either sin or cos. Watching the lighting change over time gives you a good understanding of Phong's lighting model
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm/glm/detail/func_trigonometric.hpp"
@@ -177,6 +179,12 @@ int main()
         direction.y = sin(glm::radians(pitch));
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraFront = glm::normalize(direction);
+        
+        lightingShader.use();
+        glm::vec3 lightPos(sin(glfwGetTime()), 1.f, 0.5 + cos(glfwGetTime()));
+        glm::mat4 lightingModel = glm::translate(model, lightPos);
+        lightingModel = glm::scale(lightingModel, glm::vec3(0.2f)); 
+        lightingShader.setMat4("model", lightingModel);
 
         glm::mat4 view = camera.GetViewMatrix();
 
@@ -186,6 +194,7 @@ int main()
         shaderProgram.setMat4("view", view);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         shaderProgram.setVec3("viewPos", camera.Position);
+        shaderProgram.setVec3("lightPos", lightPos);
         // render light
         lightingShader.use();
         lightingShader.setMat4("view", view);

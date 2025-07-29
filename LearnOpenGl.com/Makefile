@@ -3,8 +3,8 @@ CXXFLAGS = -Wall -Wextra -Wpedantic -g -Iinclude
 
 LDFLAGS = -lglfw -ldl -lGL
 
-SRC = src/colour.cpp glad/glad.c src/stb_image_impl.cpp 
-OUT = bin/colour
+SRC = src/Lighting_exercises/exercise-1/exercise-1.cpp glad/glad.c src/stb_image_impl.cpp 
+OUT = bin/lighting-exercise-1
 
 all: $(OUT)
 
