@@ -1,5 +1,6 @@
 // Implement Gouraud shading instead of Phong shading.
 
+#include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm/glm/detail/func_trigonometric.hpp"
@@ -44,6 +45,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 
 int main()
 {
+    // Pray to the machine spirit
+    printf("Benedicite nos, O animi Machinae, enim facimus laborum Imperatorem tuus, Imperator Omnissiahan Hominis et omnes genises. Cum auxilium tuum, coda programma recta est.\n");
     // glfw: initialize and configure
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -115,8 +118,8 @@ int main()
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
-    Shader shaderProgram("src/Lighting_exercises/exercise-2/boxShader.vs","src/Lighting_exercises/exercise-2/boxShader.fs");
-    Shader lightingShader("src/Lighting_exercises/exercise-2/lightingShader.vs","src/Lighting_exercises/exercise-2/lightingShader.fs");
+    Shader shaderProgram("src/Lighting_exercises/exercise-3/boxShader.vs","src/Lighting_exercises/exercise-3/boxShader.fs");
+    Shader lightingShader("src/Lighting_exercises/exercise-3/lightingShader.vs","src/Lighting_exercises/exercise-3/lightingShader.fs");
 
 
     // Main Initialization
@@ -171,17 +174,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // camera/view transformation
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
-        
-        lightingShader.use();
-        glm::vec3 lightPos(1.f, 1.f, 1.5f);
-        glm::mat4 lightingModel = glm::translate(model, lightPos);
-        lightingModel = glm::scale(lightingModel, glm::vec3(0.2f)); 
-        lightingShader.setMat4("model", lightingModel);
+        glm::vec3 lightPos(1.2f, 1.f, 2.f);
 
         glm::mat4 view = camera.GetViewMatrix();
 
@@ -191,9 +184,10 @@ int main()
         shaderProgram.setMat4("view", view);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         shaderProgram.setVec3("viewPos", camera.Position);
-        shaderProgram.setVec3("lightPos", glm::vec3(view * glm::vec4(lightPos, 1.f))); // Convert worldspace lightpos to vec4 -> tranform to view space -> convert to vec3 and send to shader
+        shaderProgram.setVec3("lightPos", lightPos); 
         // render light
         lightingShader.use();
+        
         lightingShader.setMat4("view", view);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
