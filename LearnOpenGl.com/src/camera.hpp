@@ -1,4 +1,5 @@
-
+// I spent half an hour pouring over this because I thought the keyboard polling was overriding mouse polling
+// It was just Palm rejection.
 
 #ifndef CAMERA_H
 #define CAMERA_H

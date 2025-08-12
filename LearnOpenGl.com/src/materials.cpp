@@ -1,5 +1,3 @@
-// Implement Gouraud shading instead of Phong shading.
-
 #include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -116,10 +114,11 @@ int main()
      0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-};
+    };
 
-    Shader shaderProgram("shaders/boxshader.vs","shaders/boxshader.fs");
-    Shader lightingShader("shaders/lightshader.vs","shaders/lightshader.fs");
+
+    Shader shaderProgram("shaders/materials/boxshader.vs","shaders/materials/boxshader.fs");
+    Shader lightingShader("shaders/materials/lightshader.vs","shaders/materials/lightshader.fs");
 
 
     // Main Initialization
@@ -150,6 +149,11 @@ int main()
 
     glm::mat4 model = glm::mat4(1.0f);
     shaderProgram.setMat4("model", model);
+
+    shaderProgram.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    shaderProgram.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    shaderProgram.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    shaderProgram.setFloat("material.shininess", 32.0f);
 
     lightingShader.use();
     lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);

@@ -1,3 +1,7 @@
+# The entire directory structure of this thing is increadibly f*cked.
+# I don't have the time to fix it.
+# Machine spirit help me.
+
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Wpedantic -g -Iinclude
 
